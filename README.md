@@ -1,69 +1,173 @@
-# CodeIgniter 4 Application Starter
+# 📘 CI4 Blog CMS - Documentation
 
-## What is CodeIgniter?
+## 📂 Project Structure
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+app/
+├── Config/
+│   ├── Filters.php          # Konfigurasi Auth filter & CSRF
+│   └── Routes.php           # Definisi semua routing & group filter
+├── Controllers/
+│   ├── Auth.php             # Logic Login, Logout, & Register
+│   ├── Dashboard.php        # Panel Admin utama
+│   ├── Home.php             # Frontend: List, Detail, & Search
+│   └── Post.php             # CRUD Artikel & REST API
+├── Database/
+│   ├── Migrations/          # Skema tabel database (Users, Posts, Categories)
+│   └── Seeds/               # Data dummy untuk pengujian awal
+├── Models/
+│   ├── CategoryModel.php    # Kelola data kategori
+│   ├── PostModel.php        # Kelola data artikel (join kategori/user)
+│   └── UserModel.php        # Kelola data autentikasi user
+└── Views/
+    ├── auth/
+    │   └── login.php        # Halaman form login
+    ├── dashboard/
+    │   └── index.php        # Statistik & overview admin
+    ├── home/
+    │   ├── category.php     # List artikel berdasarkan kategori
+    │   ├── detail.php       # Halaman baca artikel tunggal
+    │   ├── index.php        # Landing page (list artikel terbaru)
+    │   └── search.php       # Hasil pencarian artikel
+    └── posts/
+        ├── create.php       # Form tambah artikel baru
+        ├── edit.php         # Form edit artikel
+        └── index.php        # Tabel manajemen artikel (Admin)
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+public/
+├── index.php                # Entry point aplikasi
+└── uploads/                 # Penyimpanan file (Thumbnail artikel)
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+writable/
+└── (Log, Cache, Debug)
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+---
 
-## Installation & updates
+## 🔄 Application Flow
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+### 1. 🔐 Authentication (Login & Admin Access)
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+User → /login → Auth::processLogin()
+├─ Success → session created → redirect /dashboard
+└─ Failed → flash error → redirect /login
 
-## Setup
+- `/dashboard` → hanya bisa diakses jika `logged_in = true` (AuthFilter)
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+- Logout:
+Auth::logout() → destroy session → redirect /login
 
-## Important Change with index.php
+---
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+### 2. 📝 CRUD Artikel (Admin Panel)
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+| Route | Method | Description |
+|------|--------|-------------|
+| `/posts` | GET | List semua artikel |
+| `/posts/create` | GET | Form tambah artikel |
+| `/posts/store` | POST | Simpan artikel + upload thumbnail |
+| `/posts/edit/{id}` | GET | Form edit artikel |
+| `/posts/update/{id}` | POST | Update artikel |
+| `/posts/delete/{id}` | GET/DELETE | Hapus artikel |
 
-**Please** read the user guide for a better explanation of how CI4 works!
+---
 
-## Repository Management
+### 3. 🌐 Frontend Blog (Public)
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+| Route | Description |
+|------|------------|
+| `/` | List artikel + pagination |
+| `/post/{slug}` | Detail artikel |
+| `/search?q=keyword` | Hasil pencarian |
+| `/category/{slug}` | Filter berdasarkan kategori |
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+---
 
-## Server Requirements
+### 4. 🔌 REST API
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| GET | `/api/posts` | Ambil semua artikel |
+| GET | `/api/posts/{id}` | Detail artikel |
+| POST | `/api/posts` | Tambah artikel via JSON |
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+---
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+### 5. 🗄️ Database Structure
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+#### Tables
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+- **users**
+- id
+- username
+- email
+- password
+- role
+
+- **posts**
+- id
+- title
+- slug
+- content
+- user_id
+- category_id
+- image
+
+- **categories**
+- id
+- name
+- slug
+
+#### Relationships
+
+- `posts.user_id → users.id` (one-to-many)
+- `posts.category_id → categories.id` (one-to-many)
+
+---
+
+### 6. 🔒 Security
+
+- **Auth Filter** → Protect admin routes
+- **CSRF Protection** → Enabled on all forms
+- **XSS Protection** → Output sanitized using `esc()`
+- **Password Hashing** → `password_hash()`
+- **File Upload Validation** → Type & size restriction
+
+---
+
+## 💡 Application Flow Diagram
+
+
+[Visitor]
+│
+├─ /login → Auth::login → Session created → /dashboard
+│
+├─ / → Home::index → List Artikel
+│ └─ click → /post/{slug} → detail
+│
+├─ /category/{slug} → filter → list artikel
+│
+└─ /search?q=keyword → search → list artikel
+
+[Admin]
+│
+├─ /dashboard → Menu CRUD Artikel
+│ ├─ /posts/create → store
+│ ├─ /posts/edit/{id} → update
+│ └─ /posts/delete/{id} → delete
+│
+└─ /api/posts → JSON endpoints
+
+
+---
+
+## 🚀 Notes
+
+- Gunakan migration & seeder untuk setup database awal
+- Pastikan folder `/writable/uploads` writable untuk upload gambar
+- Semua route admin dilindungi oleh AuthFilter
+- API dapat digunakan untuk integrasi dengan frontend lain (SPA / mobile)
+
+---
+
+## 📌 Author
+
+Developed as a simple Blog CMS using MVC architecture.
