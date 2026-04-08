@@ -124,3 +124,39 @@ _modules/*
 
 /results/
 /phpunit*.xml
+
+
+#-------------------------
+# Additional Modern & Frontend Files
+#-------------------------
+# Node.js & Frontend Build (Vite, Webpack, Tailwind)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.stylelintcache
+dist/
+
+# Environment Backups & Variations
+.env.bak
+.env.local
+.env.testing
+.env.php
+
+# PHPUnit & Testing Extras
+.phpunit.result.cache
+/tests/_output/*
+/tests/_support/_generated/*
+error_log
+*.log
+
+# Docker & Infrastructure
+.docker/
+docker-compose.override.yml
+
+# OS Specific (Additional)
+[Dd]esktop.ini
+.Spotlight-V100
+.Trashes
+__pycache__/
