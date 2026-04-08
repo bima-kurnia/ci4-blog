@@ -2,6 +2,7 @@
 
 ## 📂 Project Structure
 
+```
 app/
 ├── Config/
 │   ├── Filters.php          # Konfigurasi Auth filter & CSRF
@@ -39,6 +40,7 @@ public/
 
 writable/
 └── (Log, Cache, Debug)
+```
 
 ---
 
@@ -47,13 +49,14 @@ writable/
 ### 1. 🔐 Authentication (Login & Admin Access)
 
 User → /login → Auth::processLogin()
+```
 ├─ Success → session created → redirect /dashboard
 └─ Failed → flash error → redirect /login
+```
 
 - `/dashboard` → hanya bisa diakses jika `logged_in = true` (AuthFilter)
 
-- Logout:
-Auth::logout() → destroy session → redirect /login
+- Logout: Auth::logout() → destroy session → redirect /login
 
 ---
 
@@ -135,7 +138,7 @@ Auth::logout() → destroy session → redirect /login
 
 ## 💡 Application Flow Diagram
 
-
+```
 [Visitor]
 │
 ├─ /login → Auth::login → Session created → /dashboard
@@ -155,7 +158,7 @@ Auth::logout() → destroy session → redirect /login
 │ └─ /posts/delete/{id} → delete
 │
 └─ /api/posts → JSON endpoints
-
+```
 
 ---
 
