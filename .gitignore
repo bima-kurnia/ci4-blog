@@ -160,3 +160,6 @@ docker-compose.override.yml
 .Spotlight-V100
 .Trashes
 __pycache__/
+
+# File Uploads By User
+public/uploads/
