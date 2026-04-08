@@ -15,8 +15,13 @@ class Home extends BaseController
 
     public function index()
     {
-        $data['posts'] = $this->postModel->orderBy('created_at', 'DESC')->paginate(2);
-        $data['pager'] = $this->postModel->pager;
+        $data['posts'] = $this->postModel
+            ->orderBy('created_at', 'DESC')
+            ->paginate(6);
+
+        $pager = $this->postModel->pager;
+        $data['pager'] = $pager;
+
         return view('home/index', $data);
     }
 
@@ -40,8 +45,11 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Kategori tidak ditemukan');
         }
 
-        $data['posts'] = $this->postModel->where('category_id', $category['id'])->findAll();
+        $data['posts'] = $this->postModel->where('category_id', $category['id'])->paginate(6);
         $data['category'] = $category;
+
+        $pager = $this->postModel->pager;
+        $data['pager'] = $pager;
 
         return view('home/category', $data);
     }
@@ -53,8 +61,12 @@ class Home extends BaseController
         $data['posts'] = $this->postModel
             ->like('title', $keyword)
             ->orLike('content', $keyword)
-            ->findAll();
+            ->paginate(6);
+
         $data['keyword'] = $keyword;
+
+        $pager = $this->postModel->pager;
+        $data['pager'] = $pager;
 
         return view('home/search', $data);
     }

@@ -88,9 +88,10 @@ class Post extends BaseController
     }
 
     //
-    // API
+    // API 
     //
-    // GET semua artikel
+    // GET /api/posts 
+    // List semua artikel
     public function apiIndex()
     {
         $posts = $this->postModel->orderBy('created_at', 'DESC')->findAll();
@@ -98,7 +99,8 @@ class Post extends BaseController
         return $this->response->setStatusCode(200)->setJSON($posts);
     }
 
-    // GET artikel by ID
+    // GET /api/posts/{id}
+    // Artikel by ID
     public function apiDetail($id)
     {
         $post = $this->postModel->find($id);
@@ -110,7 +112,8 @@ class Post extends BaseController
         return $this->response->setStatusCode(200)->setJSON($post);
     }
 
-    // POST artikel baru
+    // POST /api/posts
+    // Buat artikel baru
     public function apiCreate()
     {
         $data = $this->request->getJSON(true);
