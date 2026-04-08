@@ -1,0 +1,8 @@
+<h2>Register</h2>
+
+<form action="/save-register" method="post">
+    <input type="text" name="username" placeholder="Username"><br>
+    <input type="email" name="email" placeholder="Email"><br>
+    <input type="password" name="password" placeholder="Password"><br>
+    <button type="submit">Register</button>
+</form>

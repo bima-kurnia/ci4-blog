@@ -1,0 +1,108 @@
+📂 Struktur Folder & File Utama
+/app
+  /Controllers
+    Auth.php          # Login, logout, register
+    Dashboard.php     # Admin dashboard
+    Post.php          # CRUD artikel + REST API
+    Home.php          # Frontend blog (list, detail, search)
+  /Models
+    UserModel.php
+    PostModel.php
+    CategoryModel.php
+  /Views
+    /auth
+      login.php
+    /dashboard
+      index.php
+    /posts
+      index.php
+      create.php
+      edit.php
+    /home
+      index.php
+      detail.php
+      category.php
+      search.php
+/Config
+  Routes.php          # Semua routing + filter
+  Filters.php         # Auth filter + CSRF
+/Database
+  /Migrations         # Semua migration tabel
+  /Seeds              # Seeder dummy data
+/public
+  index.php
+/writable
+  /uploads            # Thumbnail artikel
+
+
+🔄 Alur Kerja (Flow)
+1. Auth (Login & Admin Access)
+User → /login → Auth::processLogin()
+    ├─ sukses → session dibuat → redirect /dashboard
+    └─ gagal → error flashdata → redirect /login
+/dashboard → hanya bisa diakses jika session logged_in = true (AuthFilter)
+Logout → Auth::logout() → session destroy → redirect /login
+
+
+2. CRUD Artikel (Admin Panel)
+/posts           → Post::index() → list semua artikel
+/posts/create    → Post::create() → form tambah artikel
+/posts/store     → Post::store() → simpan artikel + thumbnail
+/posts/edit/ID   → Post::edit(ID) → form edit artikel
+/posts/update/ID → Post::update(ID) → update artikel
+/posts/delete/ID → Post::delete(ID) → hapus artikel
+
+
+3. Frontend Blog (Public)
+/                → Home::index() → list artikel + pagination
+/post/slug       → Home::detail(slug) → detail artikel
+/search?q=kata  → Home::search() → hasil pencarian
+/category/slug  → Home::category(slug) → filter by kategori
+
+
+4. REST API
+GET  /api/posts        → semua artikel
+GET  /api/posts/{id}   → detail artikel
+POST /api/posts        → buat artikel via JSON
+
+
+5. Database Flow
+users(id, username, email, password, role)
+posts(id, title, slug, content, user_id, category_id, image)
+categories(id, name, slug)
+
+Relasi:
+
+posts.user_id → users.id (one-to-many)
+posts.category_id → categories.id (one-to-many)
+
+
+6. Security
+- AuthFilter → halaman admin hanya untuk user login
+- CSRF → otomatis di semua form
+- XSS → semua output pakai esc()
+- Password → hash via password_hash()
+- Upload → validasi type & size
+
+
+💡 Diagram Alur Singkat
+[Visitor] 
+   │
+   ├─ /login → [Auth::login] → Session created → /dashboard
+   │
+   ├─ / → [Home::index] → List Artikel → click → /post/slug → detail
+   │
+   ├─ /post/slug → detail → list artikel
+   │
+   ├─ /category/slug → filter → list artikel
+   │
+   └─ /search?q=keyword → search → list artikel
+
+[Admin]
+   │
+   ├─ /dashboard → menu CRUD Artikel
+   │       ├─ /posts/create → store
+   │       ├─ /posts/edit/ID → update
+   │       └─ /posts/delete/ID → delete
+   │
+   └─ /api/posts → JSON endpoints
