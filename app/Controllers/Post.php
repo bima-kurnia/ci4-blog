@@ -70,15 +70,54 @@ class Post extends BaseController
 
     public function update($id)
     {
-        $title = $this->request->getPost('title');
+        $post = $this->postModel->find($id);
 
-        $this->postModel->update($id, [
-            'title' => $title,
-            'slug' => url_title($title, '-', true),
-            'content' => $this->request->getPost('content'),
+        if (!$post) {
+            return redirect()->to('/posts')->with('error', 'Artikel tidak ditemukan');
+        }
+
+        $validation = \Config\Services::validation();
+
+        $validation->setRules([
+            'title'   => 'required|min_length[3]',
+            'content' => 'required',
+            'image'   => 'permit_empty|max_size[image,2048]|is_image[image]'
         ]);
 
-        return redirect()->to('/posts');
+        if (!$this->validate($validation->getRules())) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $title = $this->request->getPost('title');
+
+        $data = [
+            'title'   => $title,
+            'slug'    => url_title($title, '-', true),
+            'content' => $this->request->getPost('content'),
+        ];
+
+        // Handle image
+        $image = $this->request->getFile('image');
+
+        if ($image && $image->isValid() && !$image->hasMoved()) {
+
+            $newName = $image->getRandomName();
+
+            // Move new image
+            $image->move(FCPATH . 'uploads', $newName);
+
+            // Delete old image
+            if (!empty($post['image']) && file_exists(FCPATH . 'uploads/' . $post['image'])) {
+                unlink(FCPATH . 'uploads/' . $post['image']);
+            }
+
+            // Save new image
+            $data['image'] = $newName;
+        }
+
+        $this->postModel->update($id, $data);
+
+        return redirect()->to('/posts')->with('success', 'Artikel berhasil diupdate');
     }
 
     public function delete($id)
